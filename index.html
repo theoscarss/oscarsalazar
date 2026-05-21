@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oscar Salazar | Full Profile System</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Syncopate:wght@700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        :root {
+            --black: #080808;
+            --dark-gray: #1a1a1a;
+            --yellow: #FFD600; /* Amarillo señalización */
+            --white: #F0F0F0;
+            --mono-font: 'JetBrains Mono', monospace;
+            --title-font: 'Syncopate', sans-serif;
+            --body-font: 'Space Grotesk', sans-serif;
+        }
+
+        * { box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background-color: var(--black);
+            color: var(--white);
+            font-family: var(--body-font);
+            margin: 0;
+            cursor: none; /* Cursor personalizado activo */
+            overflow-x: hidden;
+        }
+
+        /* --- CURSOR --- */
+        .cursor {
+            width: 15px;
+            height: 15px;
+            background: var(--yellow);
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transition: transform 0.15s ease-out;
+        }
+        .cursor.hovered { transform: scale(3); opacity: 0.5; }
+
+        /* --- NAV LATERAL --- */
+        .sidebar {
+            position: fixed;
+            left: 0; top: 0; bottom: 0;
+            width: 60px;
+            border-right: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            background: var(--black);
+        }
+        .sidebar span {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            transform: rotate(180deg);
+            font-family: var(--mono-font);
+            font-size: 12px;
+            color: #555;
+            margin: 20px 0;
+            letter-spacing: 2px;
+        }
+
+        /* --- LAYOUT GENERAL --- */
+        .container { margin-left: 60px; padding: 0 5vw; }
+
+        section {
+            min-height: 90vh; /* Un poco menos de altura para que fluya mejor */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 80px 0;
+            border-bottom: 1px dashed #333;
+        }
+
+        /* --- TIPOGRAFÍA --- */
+        h1, h2 { font-family: var(--title-font); text-transform: uppercase; margin: 0; }
+        
+        h2 {
+            font-size: 3rem;
+            color: var(--yellow);
+            margin-bottom: 50px;
+            -webkit-text-stroke: 1px var(--yellow);
+        }
+
+        .tag {
+            font-family: var(--mono-font);
+            color: var(--yellow);
+            border: 1px solid var(--yellow);
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        /* --- NUEVO HERO CON FOTO (GRID) --- */
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr; /* Más espacio al texto, menos a la foto */
+            gap: 50px;
+            align-items: center;
+        }
+
+        .hero-text h1 {
+            font-size: 6vw;
+            line-height: 0.9;
+        }
+        .hero-text p {
+            font-size: 1.3rem;
+            max-width: 600px;
+            margin-top: 30px;
+            color: #ccc;
+            line-height: 1.5;
+        }
+
+        /* ESTILOS DE LA FOTO */
+        .hero-image-container {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-image {
+            width: 100%;
+            max-width: 450px; /* Tamaño máximo controlado */
+            height: auto;
+            /* El truco: Escala de grises y alto contraste por defecto */
+            filter: grayscale(100%) contrast(115%) brightness(0.9);
+            border-radius: 2px;
+            /* Sombra sólida amarilla desplazada */
+            box-shadow: 20px 20px 0px rgba(255, 214, 0, 0.15);
+            transition: all 0.4s ease;
+            display: block;
+        }
+
+        /* Efecto al pasar el mouse sobre la foto */
+        .hero-image:hover {
+            filter: grayscale(0%) contrast(100%) brightness(1); /* Vuelve el color */
+            box-shadow: 0px 0px 30px var(--yellow); /* Resplandor */
+            transform: scale(1.02) translateY(-5px);
+        }
+
+
+        .btn {
+            margin-top: 40px;
+            padding: 20px 50px;
+            background: var(--yellow);
+            color: var(--black);
+            text-decoration: none;
+            font-weight: bold;
+            font-family: var(--mono-font);
+            display: inline-block;
+            transition: 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        .btn:hover { background: var(--white); letter-spacing: 2px; }
+
+        /* --- GRID DE SERVICIOS --- */
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .service-card {
+            border: 1px solid #333;
+            padding: 30px;
+            transition: 0.3s;
+            background: rgba(255,255,255,0.02);
+        }
+        .service-card:hover { border-color: var(--yellow); background: #111; transform: translateY(-5px); }
+        .service-card h3 { margin-top: 0; font-family: var(--mono-font); color: var(--yellow); }
+
+        /* --- EXPERIENCIA (TIMELINE) --- */
+        .timeline-item {
+            border-left: 2px solid #333;
+            padding-left: 30px;
+            margin-bottom: 50px;
+            position: relative;
+            transition: 0.3s;
+        }
+        .timeline-item:hover { border-left-color: var(--yellow); }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -6px; top: 0;
+            width: 10px; height: 10px;
+            background: var(--black);
+            border: 2px solid var(--yellow);
+        }
+        .role { font-size: 1.8rem; font-weight: bold; display: block; margin-bottom: 5px;}
+        .company { color: var(--yellow); font-family: var(--mono-font); font-size: 1.1rem; text-transform: uppercase; }
+        .date { color: #666; font-family: var(--mono-font); font-size: 0.9rem; margin-bottom: 15px; display: block; letter-spacing: 1px;}
+
+        /* --- SKILLS MATRIX --- */
+        .skills-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+        }
+        .skill-group h3 { 
+            border-bottom: 1px solid #333; 
+            padding-bottom: 15px; 
+            margin-bottom: 30px; 
+            font-family: var(--title-font);
+            font-size: 1.5rem;
+        }
+        .skill-list span {
+            display: inline-block;
+            background: #151515;
+            border: 1px solid #333;
+            padding: 10px 18px;
+            margin: 0 8px 12px 0;
+            font-family: var(--mono-font);
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .skill-list span:hover { background: var(--yellow); color: var(--black); border-color: var(--yellow);}
+
+        /* --- FORMACIÓN --- */
+        .edu-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+        .edu-card {
+            background: #111;
+            padding: 25px;
+            border-left: 3px solid var(--yellow);
+        }
+        .edu-card strong { display: block; font-size: 1.2rem; margin-bottom: 5px; }
+        .cert-list li { margin-bottom: 10px; color: #ccc; }
+        .cert-list li strong { color: var(--yellow); }
+
+
+        /* --- CONTACTO --- */
+        .footer-content { text-align: center; padding: 50px 0; }
+        .contact-link {
+            display: block;
+            font-size: 4vw;
+            color: var(--white);
+            text-decoration: none;
+            font-family: var(--title-font);
+            transition: 0.3s;
+            -webkit-text-stroke: 1px transparent;
+        }
+        .contact-link:hover { color: var(--yellow); -webkit-text-stroke: 1px var(--yellow); }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 900px) {
+            .hero-grid { grid-template-columns: 1fr; /* Apilar en móviles */ text-align: center; }
+            .hero-image { max-width: 80%; margin: 0 auto 40px auto; /* Centrar foto */ box-shadow: 10px 10px 0px rgba(255, 214, 0, 0.15); }
+            .hero-text h1 { font-size: 10vw; }
+            .skills-container { grid-template-columns: 1fr; gap: 40px;}
+            .container { margin-left: 0; padding: 0 25px; }
+            .sidebar { display: none; }
+            .contact-link { font-size: 5vw; }
+            .respo {FONT-SIZE: 35PX;}
+        }
+    </style>
+</head>
+<body>
+
+    <div class="cursor" id="cursor"></div>
+
+    <div class="sidebar">
+        <span>OSCAR SALAZAR // PROFILE</span>
+        <span style="color: var(--yellow);">SCROLL 🠗</span>
+    </div>
+
+    <div class="container">
+        
+        <section class="hero">
+            <div class="hero-grid">
+                <div class="hero-text">
+                    <span class="tag">SYSTEM_ID: OSCAR_SALAZAR</span>
+                    <h1>ESTRATEGIA DIGITAL<br><span style="color: var(--yellow); -webkit-text-stroke: 0;">& PRODUCT GROWTH</span></h1>
+                    <p>
+                        <strong>Ingeniero y Comunicador especializado en la Coordinación de Marketing Digital y Estrategia de Producto.</strong> <br>
+                        Transformo arquitecturas técnicas en ecosistemas de alta conversión para marcas globales.
+                    </p>
+                    <div style="margin-top: 40px;">
+                         <a href="#contact" class="btn link-hover">CONECTEMOS</a>
+                    </div>
+                </div>
+
+                <div class="hero-image-container link-hover">
+                    <img src="https://oscarsalazarg.com/img/oscar-salazar.jpeg" alt="Oscar Salazar - Digital Analyst" class="hero-image">
+                </div>
+            </div>
+        </section>
+
+        <section id="services">
+            <span class="tag">CAPABILITIES_</span>
+            <h2>MIS SERVICIOS</h2>
+            <div class="grid-4">
+                <div class="service-card link-hover">
+                    <h3>[01] Product & Web Strategy</h3>
+                    <p>Liderazgo técnico en la administración de ecosistemas digitales complejos y arquitectura de información robusta para garantizar la escalabilidad del producto.</p>
+                </div>
+                <div class="service-card link-hover">
+                    <h3>[02] Digital Marketing Coordination</h3>
+                    <p>Dirección de estrategias de Marketing Digital basadas en datos, optimización de embudos de conversión (CRO) y análisis de performance para maximizar el ROI.</p>
+                </div>
+                <div class="service-card link-hover">
+                    <h3>[03] Growth & Search Strategy</h3>
+                    <p>Estrategias de crecimiento orgánico y pago (SEM/Google Ads) enfocadas en la adquisición de usuarios y el posicionamiento estratégico del producto en el mercado.</p>
+                </div>
+                <div class="service-card link-hover">
+                    <h3>[04] Strategic Product Content</h3>
+                    <p>Desarrollo de narrativas de producto de alto impacto y comunicación estratégica que traduce funcionalidades técnicas en beneficios claros para el cliente.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="experience">
+            <span class="tag">CAREER_LOG_</span>
+            <h2 class="respo">TRAYECTORIA</h2>
+            
+            <div class="timeline-item link-hover">
+                <span class="date">FEB 2024 - PRESENTE // BOGOTÁ</span>
+                <span class="role">Product Strategy & Digital Content Specialist</span>
+                <span class="company">SOFTTEK</span>
+                <p>Lidero la estrategia de producto y comunicación técnica, actuando como puente estratégico entre los equipos de ingeniería y marketing para optimizar la transformación digital de la marca.</p>
+            </div>
+
+            <div class="timeline-item link-hover">
+                <span class="date">2021 - 2024 // BOGOTÁ</span>
+                <span class="role">Digital Retail & Product Marketing Manager</span>
+                <span class="company">LG ELECTRONICS</span>
+                <p>Dirección integral de la presencia digital y el performance de producto en retailers Tier-1 (Falabella, Éxito, Cencosud). Logré la maximización del alcance y el aseguramiento de la consistencia de marca en canales de alta conversión.</p>
+            </div>
+
+            <div class="timeline-item link-hover">
+                <span class="date">2021 (8 MESES)</span>
+                <span class="role">Performance Marketing & SEM Lead.</span>
+                <span class="company">HAVAS GROUP</span>
+                <p>Liderazgo de estrategias de pauta digital y optimización de campañas de performance, fusionando la implementación técnica con objetivos de negocio y medios a gran escala.</p>
+            </div>
+            
+             <div class="timeline-item link-hover">
+                <span class="date">2019 - 2021</span>
+                <span class="role">Digital Infrastructure & Web Coordinator.</span>
+                <span class="company">ORG. SERIN</span>
+                <p>Coordinación del ecosistema digital y soporte técnico de sistemas, garantizando la estabilidad y el desarrollo web integral para los objetivos de la organización.</p>
+            </div>
+        </section>
+
+        <section id="skills">
+            <span class="tag">KNOWLEDGE_BASE_</span>
+            <h2>PERFIL HÍBRIDO</h2>
+            
+            <div class="skills-container">
+                
+                <div class="skill-group">
+                    <h3>[TECH & TOOLS]</h3>
+                    <div class="skill-list">
+                        <span>Estrategia del producto</span>
+                        <span>Gestión de productos</span>
+                        <span>Google Ads</span>
+                        <span>SEO Técnico</span>
+                        <span>Google Analytics IQ</span>
+                        <span>CMS Management</span>
+                        <span>HTML5 / CSS</span>
+                        <span>Advanced Excel</span>
+                        <span>Technical Product Alignment</span>
+                        
+                    </div>
+
+                    <h3 style="margin-top: 40px;">[CONTENT & BRAND STRATEGY]</h3>
+                    <div class="skill-list">
+                        <span>Estrategia de Contenido</span>
+                        <span>Redacción Digital Estructural</span>
+                        <span>Dirección Audiovisual (Premiere Pro / After Effects)</span>
+                        <span>Diseño Visual de Marca (Adobe Photoshop)</span>
+                        <span>Growth Content Strategy</span>
+                        <span>Narrativa de Producto (Product Storytelling)</span>
+                        <span>Optimización de Conversión (CRO Content)</span>
+                        <span>Gestión de Stakeholders Creativos</span>
+                        <span>Análisis de Sentiment & Engagement</span>
+                    </div>
+                </div>
+
+                 <div class="skill-group">
+                    <h3>[ACADEMIA]</h3>
+                    <div class="edu-grid">
+                        <div class="edu-card link-hover">
+                            <strong style="color:var(--yellow)">Ingeniería Informática</strong>
+                            Fundación Univ. Panamericana (2011-2016)
+                            <br><small style="color:#888">Proporciona la base lógica, estructural y técnica necesaria para la gestión de productos digitales complejos y la optimización de infraestructuras tecnológicas.</small>
+                        </div>
+                        <div class="edu-card link-hover">
+                            <strong style="color:var(--yellow)">Comunicación Social y Periodismo</strong>
+                            Universitaria de Colombia (En curso 9 Semestre)
+                            <br><small style="color:#888">Especialización en narrativa estratégica, gestión de marca y desarrollo de canales de comunicación para maximizar el impacto del marketing digital.</small>
+                        </div>
+                        <div class="edu-card link-hover">
+                            <strong style="color:var(--yellow)">Cinematografía y Producción de Video</strong>
+                            Escuela de Cine Black María (Certificación)
+                            <br><small style="color:#888">Habilidades audiovisuales aplicadas a la creación de contenido de alto valor, fortaleciendo la identidad visual y la comunicación de producto.</small>
+                        </div>
+                        <div class="edu-card link-hover">
+                            <strong style="color:var(--yellow)">Google Analytics Individual Qualification (IQ)</strong>
+                            Google (Certificación)
+                            <br><small style="color:#888">Especialista en la interpretación de datos y comportamiento del usuario para la toma de decisiones estratégicas de producto y optimización de conversión.</small>
+                        </div>
+                        <div class="edu-card link-hover">
+                            <strong style="color:var(--yellow)">Certificación en Vídeo de AdWords (Google Ads)</strong>
+                            Google (Certificación)
+                            <br><small style="color:#888">Dirección y ejecución de campañas de performance marketing enfocadas en la adquisición de usuarios y posicionamiento de marca a través de pauta digital.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" style="border: none; min-height: 70vh;">
+            <span class="tag">SYSTEM_EXIT_</span>
+            <div class="footer-content">
+                <h2 style="font-size: 2rem; margin-bottom: 20px; color: #fff; -webkit-text-stroke: 0;">¿INICIAMOS UN PROYECTO?</h2>
+                
+                <a href="mailto:contacto@oscarsalazarg.com" class="contact-link link-hover">
+                    contacto<br>@oscarsalazarg.com
+                </a>
+
+                <div style="margin-top: 50px; display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                    <a href="https://linkedin.com/in/oscar-salazar-gamez" target="_blank" class="btn link-hover">LINKEDIN</a>
+                    <a href="https://api.whatsapp.com/send/?phone=573115083449&text&type=phone_number&app_absent=0" target="_blank" class="btn link-hover" style="background: transparent; border: 2px solid var(--yellow); color: var(--yellow);">WHATSAPP</a>
+                    <a href="https://oscarsalazarg.com/doc/Oscar-salazar-curri-Mkt-comprimido.pdf" target="_blank" class="btn link-hover" style="background: transparent; border: 2px solid var(--yellow); color: var(--yellow);">DESCARGAR CV [PDF]</a>
+                </div>
+
+                <p style="margin-top: 50px; color: #666; font-family: var(--mono-font);">
+                    Bogotá D.C. / (+57) 311 508 3449
+                </p>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // Lógica del Cursor Personalizado
+        const cursor = document.getElementById('cursor');
+        // Seleccionamos todos los elementos interactivos
+        const links = document.querySelectorAll('a, button, .link-hover, .skill-list span');
+
+        // El cursor sigue al mouse
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        // Efecto al pasar sobre elementos interactivos
+        links.forEach(link => {
+            link.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+            link.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+        });
+    </script>
+</body>
+</html>
